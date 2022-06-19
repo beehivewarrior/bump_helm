@@ -16,9 +16,8 @@ jobs:
             github.event.pull_request.user.login == 'dependabot' ||
             github.event.pull_request.user.login == 'dependabot-preview[bot]' ||
             github.event.pull_request.user.login == 'dependabot-preview' ||
-            github.event.pull_request.user.login == 'renovate[bot]' ||
-            github.event.pull_request.user.login == 'renovate' ||
-            github.event.pull_request.user.login == 'github-actions[bot]'
+            github.event.pull_request.user.login == 'github-actions[bot]' ||
+            github.event.pull_request.user.login == 'beehivewarrior'
           )
             &&
           (
@@ -26,7 +25,6 @@ jobs:
             github.actor == 'dependabot' ||
             github.actor == 'dependabot-preview[bot]' ||
             github.actor == 'dependabot-preview' ||
-            github.actor == 'renovate[bot]' ||
-            github.actor == 'renovate' ||
-            github.actor == 'github-actions[bot]'
+            github.actor == 'github-actions[bot]' ||
+            github.actor == 'beehivewarrior'
           )
