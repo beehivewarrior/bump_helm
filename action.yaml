@@ -17,7 +17,7 @@ inputs:
 outputs:
   version_bumped:
     description: Boolean indicating that the version was incremented.
-    value: ${{ steps.bump-chart-version.outputs.version_bumped }}
+    value: ${{ steps.bump.outputs.version_bumped }}
 
 runs:
   using: composite
@@ -53,31 +53,37 @@ runs:
         "
         if [ "$RUNNER_OS" == "Windows" ]; then
           echo $entrypoint | python
+          echo "::set-output name=version_bumped::true"
         else
           echo $entrypoint | python3
+          echo "::set-output name=version_bumped::true"
         fi
-        echo "::set-output name=version_bumped::true"
+        
 
     - name: "Check For Bump"
       id: review
       if: github.actor != 'first-mate-bot' && steps.chart-changed.outputs.any_modified == 'true'
       env:
         BUMP_STRATEGY: ${{ inputs.bump_strategy }}
-        FIRST_MATE_MESSAGE: |
-          cat << EOF
-          Bumped Helm Chart Version From "$FIRST_MATE_OLD_VERSION" to "$FIRST_MATE_NEW_VERSION"
-          
-          Changes committed by ${{ github.actor }} in commit: ${{ github.event.after }} altered the Helm Chart.
-          I updated the Chart.yaml file using the "BUMP_STRATEGY" strategy.
-          
-          Signed-off-by: first-mate-bot[bot] <bot@firstmate.dev>
-          EOF
+        FIRST_MATE_OLD_VERSION: ${{ steps.bump.outputs.old_version }}
+        FIRST_MATE_NEW_VERSION: ${{ steps.bump.outputs.new_version }}
 
       run: |
-        if [[`git status --porcelain` ]]; then
+        FM_MESSAGE=`cat <<EOF
+        Bumped Helm Chart Version From "$FIRST_MATE_OLD_VERSION" to "$FIRST_MATE_NEW_VERSION"
+
+        Changes committed by "${{ github.actor }}" in commit: "${{ github.event.after }}" altered the Helm Chart.
+        I updated the Chart.yaml file using the "$BUMP_STRATEGY" strategy.
+        
+        Signed-off-by: first-mate-bot[bot] <bot@firstmate.dev>
+        EOF
+        `
+        if [[ `git status --porcelain` ]]; then
           git config --local user.name "first-mate-bot"
           git config --local user.email "bot@firstmate.dev"
           git add -A
-          git commit -m "$FIRST_MATE_MESSAGE"
+          git commit -m "$FM_MESSAGE"
+          git push
+        fi
 
       shell: bash

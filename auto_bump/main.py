@@ -61,7 +61,7 @@ if file_path:
 
     if "version" in chart_file:
         current_version = chart_file["version"]
-        os.environ["FIRST_MATE_OLD_VERSION"] = chart_file["version"]
+        print("::set-output name=old_version::%s" % chart_file["version"])
         current_version = [int(v) for v in current_version.split(".")]
 
         if STRATEGY.upper() == "PATCH":
@@ -79,9 +79,9 @@ if file_path:
         print("Version will be bumped to: "
               "%s" % new_version)
 
-        os.environ["FIRST_MATE_NEW_VERSION"] = new_version
-
         chart_file["version"] = new_version[:-1] if new_version[-1] == "." else new_version
+
+        print("::set-output name=new_version::%s" % chart_file["version"])
 
         with open(file_path, "w") as out_stream:
             yaml.dump(chart_file, out_stream, default_flow_style=False, sort_keys=False)
